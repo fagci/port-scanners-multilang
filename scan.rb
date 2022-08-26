@@ -10,8 +10,7 @@ TIMEOUT = 0.75
   Thread.new do
     s = Socket.tcp(IP, port, connect_timeout: TIMEOUT)
     puts port
-  rescue Errno::ETIMEDOUT
-  else
     s.close
+  rescue Errno::ETIMEDOUT
   end
 end.each(&:join)

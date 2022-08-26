@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from socket import socket, setdefaulttimeout
 from threading import Thread
 

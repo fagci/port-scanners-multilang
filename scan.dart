@@ -15,6 +15,5 @@ Future check(port) async {
 
 Future main() async {
   var ports = new List<int>.generate(128, (i) => i + 1);
-  var futures = ports.map(check);
-  return Future.wait(futures);
+  return Future.wait(ports.map(check));
 }
