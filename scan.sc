@@ -5,18 +5,16 @@ import ExecutionContext.Implicits.global
 
 
 def check(port: Int) = Future {
-    val socket = new Socket("192.168.0.200", port)
+    new Socket("192.168.0.200", port).close()
     println(port)
-    socket.close()
-}
+}.recover{case _ => 0}
+
 
 @main def main() = 
-  var tasks = Future
-    .traverse(1 to 128)(check(_).recover{ case _ => 0 })
+  var tasks = Future.traverse(1 to 128)(check)
 
   try
     Await.result(tasks, Duration(750, MILLISECONDS))
   catch
     case _ => 0
-
 
