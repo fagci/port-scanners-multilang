@@ -8,8 +8,7 @@ public function check_port(int port) returns error? {
 
 public function main() returns error? {
     foreach int i in 1 ..< 128 {
-        error? st = check_port(i);
-        if(!(st is error)) {
+        if(!(check_port(i) is error)) {
             io:println(i);
         }
     }
