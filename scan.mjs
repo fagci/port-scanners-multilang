@@ -5,12 +5,11 @@ import { Socket } from 'net'
 const HOST = '192.168.0.200';
 
 async function check(host, port) {
-    let socket = new Socket();
+    let socket = new Socket().setTimeout(750);
 
     socket.on('timeout', socket.destroy);
     socket.on('error', socket.destroy);
 
-    socket.setTimeout(750);
     socket.connect(port, host, function() {
         this.destroy();
         console.log(port);
