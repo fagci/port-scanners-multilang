@@ -4,30 +4,21 @@ const net = require('net');
 
 const HOST = '192.168.0.200';
 
-function check(host, port) {
-    return new Promise((resolve, reject) => {
-        let socket = new net.Socket();
+async function check(host, port) {
+    let socket = new net.Socket();
 
-        function onSuccess() {
-            this.destroy();
-            resolve(port);
-        };
+    socket.on('timeout', socket.destroy);
+    socket.on('error', socket.destroy);
 
-        function onError() {
-            this.destroy();
-            resolve(null);
-        };
-
-        socket.on('timeout', onError);
-        socket.on('error', onError);
-
-        socket.setTimeout(750);
-        socket.connect(port, host, onSuccess);
+    socket.setTimeout(750);
+    socket.connect(port, host, function() {
+        this.destroy();
+        console.log(port);
     });
 };
 
-const tasks = Array.from(Array(128), (_, i) => check(HOST, i + 1))
+const tasks = [...Array(128)].map((_, i) => check(HOST, i + 1));
 
-Promise.all(tasks).then(r => {
-    r.filter(Boolean).forEach(port => console.log(port))
-})
+(async () => {
+    for await (const _ of tasks);
+})();
