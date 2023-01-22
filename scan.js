@@ -2,6 +2,8 @@
 
 const net = require('net');
 
+const HOST = '192.168.0.200';
+
 function check(host, port) {
     return new Promise((resolve, reject) => {
         let socket = new net.Socket();
@@ -11,7 +13,7 @@ function check(host, port) {
             resolve(port);
         };
 
-        function onError () {
+        function onError() {
             this.destroy();
             resolve(null);
         };
@@ -24,9 +26,7 @@ function check(host, port) {
     });
 };
 
-const host = '192.168.0.200';
-
-const tasks = Array.from(Array(128), (_, i) => check(host, i + 1))
+const tasks = Array.from(Array(128), (_, i) => check(HOST, i + 1))
 
 Promise.all(tasks).then(r => {
     r.filter(Boolean).forEach(port => console.log(port))
