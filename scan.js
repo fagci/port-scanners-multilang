@@ -1,45 +1,33 @@
-//true 2>/dev/null; exec /usr/bin/env node "$0" "$@"
+// true 2>/dev/null; exec /usr/bin/env node "$0" "$@"
 
 const net = require('net');
 
-function check(host, port, cb) {
-    let socket = new net.Socket();
-    socket.check_result = false;
+function check(host, port) {
+    return new Promise((resolve, reject) => {
+        let socket = new net.Socket();
 
-    socket.on('connect', function() {
-        socket.check_result = true;
-        socket.destroy();
+        function onSuccess() {
+            this.destroy();
+            resolve(port);
+        };
+
+        function onError () {
+            this.destroy();
+            resolve(null);
+        };
+
+        socket.on('timeout', onError);
+        socket.on('error', onError);
+
+        socket.setTimeout(750);
+        socket.connect(port, host, onSuccess);
     });
+};
 
-    socket.on('timeout', close);
-    socket.on('error', close);
-    socket.on('close', function() {
-        cb(socket.check_result, port);
-    });
+const host = '192.168.0.200';
 
-    function close() {
-        socket.destroy();
-    }
+const tasks = Array.from(Array(128), (_, i) => check(host, i + 1))
 
-    socket.setTimeout(750);
-    socket.connect(port, host);
-}
-
-let queue = {}
-
-for (let port = 1; port < 128; port++) {
-    queue[port] = true;
-}
-
-Object.keys(queue).map(function(port) {
-    check('192.168.0.200', port, function(s, p) {
-        delete queue[p];
-        if (s) console.log(p);
-    });
-});
-
-let interval = setInterval(function() {
-    if (Object.keys(queue).length == 0) {
-        clearInterval(interval);
-    }
-});
+Promise.all(tasks).then(r => {
+    r.filter(Boolean).forEach(port => console.log(port))
+})
